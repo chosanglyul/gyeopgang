@@ -40,9 +40,7 @@ module.exports = {
         await next();
     },
     delete: async(ctx, next) => {
-        if(parseInt(ctx.request.body.code, 10) !== ctx.session.passport.user.code) ctx.throw(400);
-        const isExist = await ctx.state.collection.users.countDocuments({ code: parseInt(ctx.session.passport.user.code, 10)});
-        if(!isExist) ctx.throw(400);
+        if(parseInt(ctx.request.body.code, 10) !== ctx.session.passport.user.code) ctx.throw(401);
         await ctx.state.collection.users.deleteOne({ code: parseInt(ctx.session.passport.user.code, 10) });
         ctx.logout();
         ctx.redirect('/');
@@ -50,17 +48,15 @@ module.exports = {
     },
     patch: async(ctx, next) => {
         if(!isNumber(ctx.request.body.class, "4") || !isNumber(ctx.request.body.subject, "4")) ctx.throw(400);
-        const user = await ctx.state.collection.users.findOne({ code: ctx.session.passport.user.code});
-        if(!user) ctx.throw(400);
         const subject = await ctx.state.collection.subjects.findOne({ code: parseInt(ctx.request.body.subject, 10) });
         const classnum = parseInt(ctx.request.body.class, 10);
         if(!subject || classnum <= 0 || classnum > subject.classes) ctx.throw(400);
-        if(user.subjects.includes(subject.code)) ctx.throw(400);
-        user.subjects.push(subject.code);
-        user.classes.push(classnum);
+        if(ctx.session.passport.user.subjects.includes(subject.code)) ctx.throw(400);
+        ctx.session.passport.user.subjects.push(subject.code);
+        ctx.session.passport.user.classes.push(classnum);
 
         await ctx.state.collection.users.findOneAndUpdate({ code: ctx.session.passport.user.code }, {
-            $set: { subjects: user.subjects, classes: user.classes }
+            $set: { subjects: ctx.session.passport.user.subjects, classes: ctx.session.passport.user.classes }
         });
         ctx.redirect(`/profile/${ctx.session.passport.user.code}`);
         await next();

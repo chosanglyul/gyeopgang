@@ -27,7 +27,7 @@ const makeprofile = (user, subjectArray, subjectAll) => {
         html += `</ul>\n<h3> 과목 추가하기 </h3>`;
         html += `<form action="/endpoint/add_subject" method="post">
             <select name="subject"> ${subjectdropdown} </select>
-            <select name="class"> ${classdropdown} </select>
+            <select name="class"> ${classdropdown} </select> 분반
             <p><input type="submit", value="과목 추가"></p>
         </form>`;
     }

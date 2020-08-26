@@ -3,7 +3,7 @@ module.exports = async (ctx, next) => {
     <!doctype html>
     <html>
         <head>
-            <title> SSHS Gyeopgang in Web </title>
+            <title> SSHS Gyeopgang in Web - Beta</title>
             <meta charset="utf-8">
         </head>
         <body>

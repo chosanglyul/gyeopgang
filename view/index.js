@@ -11,5 +11,5 @@ frontend.get("/", main);
 frontend.get("/login", auth.login).get("/signup", auth.signup);
 frontend.get("/profile", profile.index).get("/profile/:code", profile.user);
 frontend.get("/gyeopgang/:code", gyeopgang);
-frontend.get("/subject", subject.index).get("/subject/:code", subject.subject);
+frontend.get("/subject", subject.index);
 module.exports = frontend;
