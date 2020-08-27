@@ -1,4 +1,5 @@
 const isNumber = require('../lib/isNumeric');
+const makeButton = require('../lib/makeButton');
 
 const makegyeopgang = (subjectInfo, user1, user2) => {
     var nogyeop = true;
@@ -11,14 +12,23 @@ const makegyeopgang = (subjectInfo, user1, user2) => {
         }
     });
     if(nogyeop) html += `<li> 노겹강 ㅠㅠ </li>\n`;
-    html += `</ul>`;
+    html += `</ul>\n<h3> 기타 메뉴 </h3>\n`;
+    html += makeButton('/profile', 'GET', '마이페이지');
+    html += makeButton('/', 'GET', '홈으로');
+    html += makeButton('/endpoint/logout', 'POST', '로그아웃');
     return html;
 }
 
 module.exports = async (ctx, next) => {
-    if(!isNumber(ctx.params.code, "4")) ctx.throw(400);
-    const user = await ctx.state.collection.users.findOne({ code: parseInt(ctx.params.code, 10) });
-    if(!user) ctx.throw(400);
+    if(!ctx.request.query || !isNumber(ctx.request.query.code, "4")) {
+        ctx.flash('error', '잘못된 학번입니다.');
+        return ctx.redirect('/profile');
+    }
+    const user = await ctx.state.collection.users.findOne({ code: parseInt(ctx.request.query.code, 10) });
+    if(!user) {
+        ctx.flash('error', '존재하지 않는 사용자입니다.');
+        return ctx.redirect('/profile');
+    }
     const subjectInfo = await ctx.state.collection.subjects.find().toArray();
     ctx.body = makegyeopgang(subjectInfo, ctx.session.passport.user, user);
     await next();

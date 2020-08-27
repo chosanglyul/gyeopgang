@@ -1,5 +1,5 @@
 const isNumber = require('../lib/isNumeric');
-const isArray = require('../lib/isArray');
+//const isArray = require('../lib/isArray');
 
 module.exports = {
     /*
@@ -28,7 +28,10 @@ module.exports = {
     */
     post: async(ctx, next) => {
         const isExist = await ctx.state.collection.users.countDocuments({ code: parseInt(ctx.request.body.code, 10)});
-        if(isExist >= 1) ctx.throw(400);
+        if(isExist >= 1) {
+            ctx.flash('error', '이미 가입된 학번입니다.');
+            return ctx.redirect('/signup');
+        }
         await ctx.state.collection.users.findOneAndUpdate({ code: parseInt(ctx.request.body.code, 10) }, {
             $setOnInsert: {
                 name: ctx.request.body.name,
@@ -36,33 +39,20 @@ module.exports = {
                 classes: []
             }
         }, { upsert: true });
-        ctx.redirect(`/profile/${ctx.request.body.code}`);
-        await next();
+        ctx.flash('success', '회원가입에 성공했습니다. 로그인해주세요.');
+        return ctx.redirect('/');
     },
     delete: async(ctx, next) => {
         if(parseInt(ctx.request.body.code, 10) !== ctx.session.passport.user.code) ctx.throw(401);
         await ctx.state.collection.users.deleteOne({ code: parseInt(ctx.session.passport.user.code, 10) });
         ctx.logout();
-        ctx.redirect('/');
-        await next();
-    },
-    patch: async(ctx, next) => {
-        if(!isNumber(ctx.request.body.class, "4") || !isNumber(ctx.request.body.subject, "4")) ctx.throw(400);
-        const subject = await ctx.state.collection.subjects.findOne({ code: parseInt(ctx.request.body.subject, 10) });
-        const classnum = parseInt(ctx.request.body.class, 10);
-        if(!subject || classnum <= 0 || classnum > subject.classes) ctx.throw(400);
-        if(ctx.session.passport.user.subjects.includes(subject.code)) ctx.throw(400);
-        ctx.session.passport.user.subjects.push(subject.code);
-        ctx.session.passport.user.classes.push(classnum);
-
-        await ctx.state.collection.users.findOneAndUpdate({ code: ctx.session.passport.user.code }, {
-            $set: { subjects: ctx.session.passport.user.subjects, classes: ctx.session.passport.user.classes }
-        });
-        ctx.redirect(`/profile/${ctx.session.passport.user.code}`);
-        await next();
+        return ctx.redirect('/');
     },
     common: async(ctx, next) => {
-        if(!isNumber(ctx.request.body.code, "4") || ctx.request.body.code < 0) ctx.throw(400);
+        if(!isNumber(ctx.request.body.code, "4") || ctx.request.body.code < 0) {
+            ctx.flash('error', '잘못된 학번입니다.');
+            return ctx.redirect('/signup');
+        }
         await next();
     },
 }

@@ -5,6 +5,8 @@ const session = require("koa-session");
 const bodyParser = require('koa-bodyparser');
 const passport = require("koa-passport");
 const LocalStrategy = require("passport-local").Strategy;
+const flash = require('koa-better-flash');
+const helmet = require('koa-helmet');
 
 const frontend = require("./view");
 const endpoint = require("./endpoint");
@@ -29,19 +31,23 @@ passport.use('local', new LocalStrategy({
     passwordField: 'name',
     passReqToCallback: true
 }, async ({ ctx }, code, name, done) => {
-    if(!isNumber(code, "4")) done(null, false, { message: "등록되지 않은 학번입니다." });
+    if(!isNumber(code, "4")) return done(null, false, { message: "등록되지 않은 학번입니다." });
     const user = await ctx.state.collection.users.findOne({ code: parseInt(code, 10) });
-    if(!user) done(null, false, { message: "등록되지 않은 학번입니다." });
-    if(name !== user.name) done(null, false, { message: "이름이 일치하지 않습니다." });
-
-    done(null, user);
+    if(!user) return done(null, false, { message: "등록되지 않은 학번입니다." });
+    if(!(name === user.name)) return done(null, false, { message: "이름이 일치하지 않습니다." });
+    return done(null, user, { message: "로그인에 성공하였습니다." });
 }));
-router.use(bodyParser()).use(session(app)).use(getDB);
+
+router.use(helmet()).use(bodyParser()).use(session({
+    rolling: true,
+    renew: true,
+    maxAge: 3600000
+}, app)).use(getDB).use(flash());
 router.use(passport.initialize()).use(passport.session()).use(withAuth);
 router.use(frontend.routes());
 router.use('/endpoint', endpoint.routes());
 
-app.keys = ["pebble-secret-key"];
+app.keys = [process.env.KEYS];
 app.use(router.routes()).use(router.allowedMethods());
 
 app.listen(PORT, () => console.log(`Server listening on port: ${PORT}`));

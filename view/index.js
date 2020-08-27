@@ -10,6 +10,6 @@ const frontend = new Router();
 frontend.get("/", main);
 frontend.get("/login", auth.login).get("/signup", auth.signup);
 frontend.get("/profile", profile.index).get("/profile/:code", profile.user);
-frontend.get("/gyeopgang/:code", gyeopgang);
+frontend.get("/gyeopgang", gyeopgang);
 frontend.get("/subject", subject.index);
 module.exports = frontend;
