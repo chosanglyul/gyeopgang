@@ -1,4 +1,5 @@
 const isNumber = require('../lib/isNumeric');
+const checkKorean = require('../lib/checkKorean');
 //const isArray = require('../lib/isArray');
 
 module.exports = {
@@ -30,6 +31,10 @@ module.exports = {
         const isExist = await ctx.state.collection.users.countDocuments({ code: parseInt(ctx.request.body.code, 10)});
         if(isExist >= 1) {
             ctx.flash('error', '이미 가입된 학번입니다.');
+            return ctx.redirect('/signup');
+        }
+        if(checkKorean.allH(ctx.request.body.name) === false) {
+            ctx.flash('error', '잘못된 이름입니다.');
             return ctx.redirect('/signup');
         }
         await ctx.state.collection.users.findOneAndUpdate({ code: parseInt(ctx.request.body.code, 10) }, {

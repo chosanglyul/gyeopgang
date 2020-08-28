@@ -3,7 +3,7 @@ const makeButton = require('../lib/makeButton');
 
 const makegyeopgang = (subjectInfo, user1, user2) => {
     var nogyeop = true;
-    var html = `<h2>${user1.code} ${user1.name}와 ${user2.code} ${user2.name}의 겹강</h2>\n<ul>\n`;
+    var html = `<h2>${user1.code} ${user1.name}와(과) ${user2.code} ${user2.name}의 겹강</h2>\n<ul>\n`;
     user1.subjects.forEach((subject, idx) => {
         const idx2 = user2.subjects.indexOf(subject);
         if(idx2 !== -1 && user2.classes[idx2] === user1.classes[idx]) {
