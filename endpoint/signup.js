@@ -54,7 +54,8 @@ module.exports = {
         return ctx.redirect('/');
     },
     common: async(ctx, next) => {
-        if(!isNumber(ctx.request.body.code, "4") || ctx.request.body.code < 0) {
+        const codecheck = /^[1-3][1-8][0-1][0-9]$/;
+        if(!isNumber(ctx.request.body.code, "4") || ctx.request.body.code < 0 || !codecheck.test(ctx.request.body.code)) {
             ctx.flash('error', '잘못된 학번입니다.');
             return ctx.redirect('/signup');
         }
