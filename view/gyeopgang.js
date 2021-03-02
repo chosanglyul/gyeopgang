@@ -21,8 +21,13 @@ const makegyeopgang = (subjectInfo, user1, user2) => {
 
 module.exports = async (ctx, next) => {
     if(!ctx.request.query || !isNumber(ctx.request.query.code, "4")) {
-        ctx.flash('error', '잘못된 학번입니다.');
-        return ctx.redirect('/profile');
+        const user = await ctx.state.collection.users.findOne({ name: ctx.request.query.code });
+        if(!user) {
+            ctx.flash('error', '잘못된 학번/이름입니다.');
+            return ctx.redirect('/profile');
+        } else {
+            return ctx.redirect(`/gyeopgang?code=${user.code}`);
+        }
     }
     const user = await ctx.state.collection.users.findOne({ code: parseInt(ctx.request.query.code, 10) });
     if(!user) {
