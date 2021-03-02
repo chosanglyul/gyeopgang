@@ -55,7 +55,7 @@ const makeprofile = (user, subjectArray, subjectAll, successFlash, failureFlash)
     html += makeButton('/', 'GET', '홈으로');
     html += makeButton('/endpoint/logout', 'POST', '로그아웃');
     html += `<form action="/gyeopgang" method="GET">
-        <input type="text" name="code" placeholder="학번">
+        <input type="text" name="code" placeholder="학번/이름">
         <input type="submit", value="겹강 찾기">
     </form>`;
     return html;
