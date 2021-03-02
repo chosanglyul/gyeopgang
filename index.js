@@ -48,6 +48,7 @@ router.use(frontend.routes());
 router.use('/endpoint', endpoint.routes());
 router.use(async (ctx, next) => {
     await ctx.state.client.close();
+    await next();
 });
 
 app.keys = [process.env.KEYS];
