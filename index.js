@@ -46,6 +46,9 @@ router.use(helmet()).use(bodyParser()).use(session({
 router.use(passport.initialize()).use(passport.session()).use(withAuth);
 router.use(frontend.routes());
 router.use('/endpoint', endpoint.routes());
+router.use(async (ctx, next) => {
+    await ctx.state.client.close();
+});
 
 app.keys = [process.env.KEYS];
 app.use(router.routes()).use(router.allowedMethods());
